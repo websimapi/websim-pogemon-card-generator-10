@@ -2,7 +2,7 @@ import { getDB } from './db.js';
 
 const websimSocket = new WebsimSocket();
 
-export async function sendToWebsimGallery(cardData) {
+export async function sendToPoGePalace(cardData) {
   try {
     // First fetch the image and convert it to a File object
     const response = await fetch(cardData.imageUrl);
@@ -28,11 +28,11 @@ export async function sendToWebsimGallery(cardData) {
       };
     }
     
-    // Create a new record in the websim gallery collection
-    const galleryRecord = await websimSocket.collection('user-cards').create({
+    // Create a new record in the websim palace collection
+    const palaceRecord = await websimSocket.collection('pogemon').create({
       name: cardData.name,
       description: cardData.description,
-      characterType: cardData.type,
+      pogetype: cardData.type,
       height: cardData.height,
       weight: cardData.weight,
       imageUrl: cardData.imageUrl,
@@ -41,16 +41,16 @@ export async function sendToWebsimGallery(cardData) {
       creator: websimSocket.party.client.username
     });
     
-    console.log('New gallery record created:', galleryRecord);
+    console.log('New palace record created:', palaceRecord);
 
-    // Subscribe to changes in the gallery collection
-    websimSocket.collection('user-cards').subscribe((cards) => {
-      console.log('Gallery collection updated:', cards);
+    // Subscribe to changes in the palace collection
+    websimSocket.collection('pogemon').subscribe((pogemon) => {
+      console.log('Palace collection updated:', pogemon);
     });
 
-    return galleryRecord;
+    return palaceRecord;
   } catch (error) {
-    console.error('Error sending to gallery:', error);
+    console.error('Error sending to palace:', error);
     throw error;
   }
 }
