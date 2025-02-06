@@ -109,7 +109,7 @@ export async function createCollectionViewer() {
         pogepalace.collection('pogemon').subscribe((updatedPogemons) => {
           if (showingPalace) { // Only update if still showing palace
             grid.innerHTML = '';
-            displayFilteredCards(updatedPogemons, [], 'single', true); // Pass true for isPalaceView
+            displayFilteredCards(updatedPogemons, [], 'single', true);
           }
         });
       } catch (error) {
@@ -186,7 +186,7 @@ export async function createCollectionViewer() {
           const palaceButton = e.target.closest('.palace-button');
           
           if (palaceButton) {
-            e.stopPropagation(); // Prevent card load
+            e.stopPropagation();
             try {
               await showPalaceDialog(newCard.cardData);
             } catch (error) {
@@ -254,7 +254,7 @@ export async function createCollectionViewer() {
       const importChoice = await showImportDialog(data.pogeflex.cards.length);
       if (importChoice === null) {
         fileInput.value = '';
-        return; // User cancelled
+        return;
       }
 
       // Get existing cards to check for duplicates
@@ -262,7 +262,6 @@ export async function createCollectionViewer() {
       let cardsToImport;
       
       if (importChoice === 'skip') {
-        // Filter out exact duplicates
         cardsToImport = data.pogeflex.cards.filter(importCard => 
           !existingCards.some(existingCard => 
             existingCard.name === importCard.name &&
@@ -271,20 +270,16 @@ export async function createCollectionViewer() {
           )
         );
       } else {
-        // Import all cards
         cardsToImport = data.pogeflex.cards;
       }
 
-      // Import the cards
       const importPromises = cardsToImport.map(card => saveCard(card));
       await Promise.all(importPromises);
       
-      // Refresh the collection display
       const grid = viewer.querySelector('.collection-grid');
       grid.innerHTML = '';
       await showCollection();
 
-      // Show success message
       const skippedCount = data.pogeflex.cards.length - cardsToImport.length;
       if (importChoice === 'skip' && skippedCount > 0) {
         showToast(`Imported ${cardsToImport.length} cards. Skipped ${skippedCount} duplicate(s).`);
@@ -295,15 +290,14 @@ export async function createCollectionViewer() {
       console.error('Error importing collection:', error);
       showToast('Failed to import collection: ' + error.message, true);
     }
-
-    // Reset the file input
     fileInput.value = '';
   });
 
   return viewer;
 }
 
-export async function handleRegisterToFlex(palaceCardData) {
+// Renamed export: Previously "handleRegisterToFlex", now exporting as "handleRegisterToCollection"
+export async function handleRegisterToCollection(palaceCardData) {
   // First check for duplicates
   const existingCards = await getAllCards();
   const isDuplicate = existingCards.some(card => 
@@ -344,11 +338,9 @@ export async function handleRegisterToFlex(palaceCardData) {
 
       confirmBtn.addEventListener('click', async () => {
         try {
-          // Show loading state
           confirmBtn.disabled = true;
           spinner.classList.remove('hidden');
 
-          // Create a new card data object mapping palace data to flex format
           const flexCardData = {
             name: palaceCardData.name,
             description: palaceCardData.description,
@@ -359,21 +351,17 @@ export async function handleRegisterToFlex(palaceCardData) {
             backupImageUrl: palaceCardData.backupImageUrl
           };
 
-          // Save to local IndexDB
           await saveCard(flexCardData);
           
           dialog.remove();
-          showToast(`${palaceCardData.name} was successfully registered to your PoGeFlex collection!${
-            isDuplicate ? ' (Duplicate copy)' : ''
-          }`);
+          showToast(`${palaceCardData.name} was successfully registered to your PoGeFlex collection!${isDuplicate ? ' (Duplicate copy)' : ''}`);
           
-          // Refresh the collection view if in palace view
           const viewer = document.querySelector('.collection-viewer');
           if (viewer && viewer.querySelector('h2').textContent.includes('PoGePalace')) {
             const palaceToggleBtn = viewer.querySelector('.palace-toggle-btn');
             if (palaceToggleBtn) {
-              palaceToggleBtn.click(); // Switch to PoGeFlex view
-              setTimeout(() => palaceToggleBtn.click(), 100); // Switch back to palace view
+              palaceToggleBtn.click();
+              setTimeout(() => palaceToggleBtn.click(), 100);
             }
           }
           
@@ -491,7 +479,6 @@ export async function showPalaceDialog(cardData) {
       });
 
       confirmBtn.addEventListener('click', async () => {
-        // Show loading state
         confirmBtn.disabled = true;
         spinner.classList.remove('hidden');
 
@@ -503,7 +490,6 @@ export async function showPalaceDialog(cardData) {
         } catch (error) {
           console.error('Failed to send to PoGePalace:', error);
           showToast('Failed to send to PoGePalace', true);
-          // Re-enable button and hide spinner on error
           confirmBtn.disabled = false;
           spinner.classList.add('hidden');
         }
